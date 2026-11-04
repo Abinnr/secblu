@@ -47,26 +47,57 @@ For a release exercise, change the label to `Version 1.1`, rebuild, deploy the n
 
 ## Serve directly with Nginx
 
-This project targets the domain root, such as `http://training.example/`. Copy the **contents** of `dist/` into the Nginx web root (the supplied example uses `/var/www/secublu`). The folder must contain `index.html`, `favicon.svg`, and `assets/`.
+## Production deployment on AWS EC2
 
-Use the included `nginx.conf` as a server-block example. Adapt its web root, listen address, and server name to your training machine; avoid conflicting with an existing default server. After placing it in your distribution's enabled Nginx configuration, validate and reload Nginx:
+The production application is deployed on an existing Ubuntu EC2 instance using Node.js, npm, PM2 and Nginx.
 
-```sh
-sudo nginx -t
-sudo systemctl reload nginx
+### Build the application
+
+Install the exact dependencies and generate the production build:
+
+```bash
+npm ci
+npm run build
 ```
 
-**Browser routes need an Nginx fallback to `index.html`.** The essential rule is:
+The generated production files are stored in the `dist/` directory.
 
-```nginx
-location / {
-    try_files $uri $uri/ /index.html;
-}
+### Serve the production build using PM2
+
+PM2 serves the production build as a static application on localhost port 3000 with SPA support.
+
+```bash
+pm2 serve dist 3000 --spa --name abin-react-app
 ```
 
-Without it, directly opening or refreshing `/profile` or `/projects` can return an Nginx 404. The fallback loads the React application, which then selects the page. Unknown app paths also return the app shell and display its friendly 404 screen; their HTTP status is 200 in this static SPA configuration. Missing files under `/assets/` return a real HTTP 404 in the provided config.
+The application is accessible locally at:
 
-Do not open `dist/index.html` with a `file://` URL. Serve the build over HTTP. Hosting under a subdirectory requires coordinating Vite's `base`, the router's `basename`, and the Nginx location; this sample is configured for `/`.
+`http://127.0.0.1:3000`
+
+### Configure Nginx reverse proxy
+
+Nginx receives public HTTP and HTTPS requests and forwards application traffic to:
+
+`http://127.0.0.1:3000`
+
+The existing DuckDNS hostname and valid HTTPS certificate are retained. HTTP requests are redirected to HTTPS.
+
+### Network security
+
+- Port 22: SSH access restricted to the approved client IP.
+- Port 80: Public HTTP access for HTTPS redirection.
+- Port 443: Public HTTPS application access.
+- Port 3000: Local application access only; no public inbound access.
+
+### Application verification
+
+Verify the Home, Profile and Projects pages through the public HTTPS domain.
+
+Direct access and refreshing `/profile` and `/projects` must work correctly.
+
+PM2 startup configuration ensures the application process can recover automatically after an EC2 reboot.
+
+Docker and automated CI/CD pipelines are not required for this deployment.
 
 ## Deployment verification
 
