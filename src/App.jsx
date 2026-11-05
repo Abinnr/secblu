@@ -26,7 +26,7 @@ function Home() {
         <h1>Learn by building.<br /><span>Grow by deploying.</span></h1>
         <p className="hero-description">Welcome to SecuBlu Cloud Training. A small application for a big first step: taking your code from your laptop to the cloud.</p>
         <div className="actions"><Link className="button primary" to="/projects">Explore projects <Icon name="arrow" /></Link><Link className="button secondary" to="/profile">Meet your profile</Link></div>
-        <p className="hero-note"><Icon name="check" /> Frontend only <span>·</span> Local sample data <span>·</span> Ready to deploy</p>
+        <p className="hero-note"><Icon name="check" /> Frontend only <span>·</span> My sample data <span>·</span> Ready to deploy</p>
       </div>
       <div className="deployment-visual" aria-label="Deployment workflow: local code, production build, Nginx server">
         <div className="visual-header"><span className="visual-dots">● ● ●</span><span>YOUR DEPLOYMENT WORKSPACE</span></div>
